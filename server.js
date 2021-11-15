@@ -75,10 +75,27 @@ const addEmployeeQuestions = [
 
 const {choices} = startQuestions[0];
 
-inquirer
-.prompt(startQuestions)
-.then((choice) => {
+const startPrompt = () => {
+    inquirer
+    .prompt(startQuestions)
+    .then((choiceObj) => {
+        const {choice} = choiceObj;
+        switch(choice) {
+            case choices[0] : 
+            view.viewDep();
+            startPrompt();
+            break;
+            case choices[1] : 
+            view.viewRole();
+            startPrompt();
+            break;
+            case choices[2] : 
+            view.viewEmployees();
+            startPrompt();
+            break;
+            
+        } 
+    })
+}
 
-    view();
-    
-})
+startPrompt();
