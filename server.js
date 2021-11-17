@@ -93,7 +93,7 @@ const updateEmployeeQuestions = [
         type : "list",
         message : "Which employee's role do you want to update?",
         name : "employee",
-        choices : ['Aidan']
+        choices : []
     },
     {
         type : "list",
@@ -126,6 +126,7 @@ const makeManagerChoices = () => {
     db.query(`SELECT id, first_name FROM employee order by id`, function (err, results) {
         results.forEach(employee => {
             addEmployeeQuestions[3].choices.push(employee.first_name);
+            updateEmployeeQuestions[0].choices.push(employee.first_name);
         });
       })
       
@@ -136,7 +137,7 @@ const updateEmployeeChoices = () => {
     db.query(`SELECT id, first_name FROM employee`, function (err, results) {
         results.forEach(employee => {
             updateEmployeeQuestions[0].choices.push(employee.first_name);
-            console.log(updateEmployeeQuestions[0].choices)
+            // console.log(updateEmployeeQuestions[0].choices)
         });
       })
       
@@ -146,6 +147,7 @@ const updateRoleChoices = () => {
     db.query(`SELECT id, title FROM role`, function (err, results) {
         results.forEach(role => {
             updateEmployeeQuestions[1].choices.push(role.title);
+            // console.log(updateEmployeeQuestions[1].choices)
         });
       })
       
