@@ -60,17 +60,6 @@ const addRoleQuestions = [
     }
 ]
 
-const makeDepChoices = () => {
-    db.query(`SELECT * FROM department`, function (err, results) {
-        results.forEach(dep => {
-            addRoleQuestions[2].choices.push(dep.name);
-        });
-      })
-      
-}
-
-
-
 
 const addEmployeeQuestions = [
     {
@@ -93,13 +82,39 @@ const addEmployeeQuestions = [
         type : "list",
         message : "Select the employee’s manager",
         name : "manager",
-        choices : []
+        choices : ['None']
     },
 ]
 
 
+
+const updateEmployeeQuestions = [
+    {
+        type : "list",
+        message : "Which employee's role do you want to update?",
+        name : "employee",
+        choices : ['Aidan']
+    },
+    {
+        type : "list",
+        message : "Which role do you want to assign to the employee?",
+        name : "role",
+        choices : []
+    },
+]
+
+const makeDepChoices = () => {
+    db.query(`SELECT * FROM department order by id`, function (err, results) {
+        results.forEach(dep => {
+            addRoleQuestions[2].choices.push(dep.name);
+        });
+      })
+      
+}
+
+
 const makeRoleChoices = () => {
-    db.query(`SELECT id, title FROM role`, function (err, results) {
+    db.query(`SELECT id, title FROM role order by id`, function (err, results) {
         results.forEach(role => {
             addEmployeeQuestions[2].choices.push(role.title);
         });
@@ -108,13 +123,36 @@ const makeRoleChoices = () => {
 }
 
 const makeManagerChoices = () => {
-    db.query(`SELECT id, first_name FROM employee`, function (err, results) {
-        results.forEach(manager => {
-            addEmployeeQuestions[3].choices.push(manager.first_name);
+    db.query(`SELECT id, first_name FROM employee order by id`, function (err, results) {
+        results.forEach(employee => {
+            addEmployeeQuestions[3].choices.push(employee.first_name);
         });
       })
       
 }
+
+
+const updateEmployeeChoices = () => {
+    db.query(`SELECT id, first_name FROM employee`, function (err, results) {
+        results.forEach(employee => {
+            updateEmployeeQuestions[0].choices.push(employee.first_name);
+            console.log(updateEmployeeQuestions[0].choices)
+        });
+      })
+      
+}
+
+const updateRoleChoices = () => {
+    db.query(`SELECT id, title FROM role`, function (err, results) {
+        results.forEach(role => {
+            updateEmployeeQuestions[1].choices.push(role.title);
+        });
+      })
+      
+}
+
+
+
 
 const {choices} = startQuestions[0];
 
@@ -154,6 +192,15 @@ const startPrompt = () => {
             makeManagerChoices();
             addEmployeePrompt();
             break;
+
+            case choices[6] :
+            updateEmployeeChoices();
+            updateRoleChoices(); 
+            updateEmployeePrompt();
+            break;
+
+            case choices[7] :
+            break;
         } 
     })
 }
@@ -162,32 +209,55 @@ const addDepPrompt = () => {
     inquirer.prompt(addDepQuestion)
             .then((departmentObj) => {
                 add.addDep(departmentObj.depName);
-                startPrompt();
             })
+            .then(()=> startPrompt())
 }
 
 const addRolePrompt = () => {
     inquirer.prompt(addRoleQuestions)
             .then((roleObj) => {
                 const { roleName, roleSalary, roleDep } = roleObj;
-                const index = addRoleQuestions[2].choices.indexOf(roleDep) + 1;       
-                add.addRole(roleName, roleSalary, index);
-                startPrompt();
+
+                db.query(`SELECT id FROM department WHERE name = ?`, roleDep, function(err, results) {
+                    const roleIndex = results[0].id;
+                    add.addRole(roleName, roleSalary, roleIndex);
+                })
             })
+            .then(()=> startPrompt())
 }
+
 
 const addEmployeePrompt = () => {
     inquirer.prompt(addEmployeeQuestions)
             .then((employeeObj) => {
                 const { firstname, lastname, role, manager } = employeeObj;
-                const roleIndex = addEmployeeQuestions[2].choices.indexOf(role) + 1;
-                console.log(roleIndex)
-                const managerindex = addEmployeeQuestions[3].choices.indexOf(manager) + 1;
-                console.log(managerindex)
-        
-                add.addEmployees(firstname, lastname, roleIndex, managerindex);
-                startPrompt();
+
+                db.query(`SELECT role.id AS roleId FROM role WHERE title = ?`, role, function(err, results) {
+                    const roleIndex = results[0].roleId
+
+                db.query(`SELECT employee.id AS managerId FROM employee WHERE first_name = ?`, manager, function(err, results) {
+                    const managerIndex = results[0].managerId
+                    add.addEmployees(firstname, lastname, roleIndex, managerIndex)
+                })
             })
+
+            })
+            .then(()=> startPrompt())
+}
+
+
+const updateEmployeePrompt = () => {
+    inquirer.prompt(updateEmployeeQuestions)
+            .then((updateObj) => {
+                const { employee, role } = updateObj;
+
+                db.query(`SELECT id FROM role WHERE title = ?`, role, function(err, results) {
+                    const roleIndex = results[0].id;
+
+                    update(roleIndex, employee);
+                })
+            })
+            .then(()=> startPrompt())
 }
 
 startPrompt();

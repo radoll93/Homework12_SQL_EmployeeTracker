@@ -1,6 +1,8 @@
 const mysql = require('mysql2');
 const table = require('console.table');
 
+
+
 require('dotenv').config();
 
 
@@ -9,22 +11,23 @@ const db = mysql.createConnection({
       user: process.env.USER,
       password: process.env.PASSWORD,
       database: 'company_db'
-    },
-    console.log('Connected to the company_db'));
+    });
+
 
 
 const viewDep = () => {
-    db.query(`SELECT * FROM department`, function (err, results) {
-      console.log('');
-      console.table(results);
-    })
+  db.query(`SELECT * FROM department ORDER BY id`, function (err, results) {
+    console.log("");
+    console.table(results);
+  })
 }
 
 const viewRole = () => {
   db.query(`SELECT role.id, title, name AS department, salary 
             FROM role
             JOIN department
-            ON role.department_id = department.id`, function (err, results) {
+            ON role.department_id = department.id
+            ORDER BY role.id`, function (err, results) {
     console.log("");
     console.table(results);
   })
@@ -37,8 +40,9 @@ const viewEmployees = () => {
             ON employee.role_id = role.id
             JOIN department
             ON role.department_id = department.id
-            LEFT OUTER JOIN employee AS managers
-            ON employee.manager_id = managers.id`, function (err, results) {
+            LEFT JOIN employee AS managers
+            ON employee.manager_id = managers.id
+            ORDER BY employee.id`, function (err, results) {
     console.log('');
     console.table(results);
   })
