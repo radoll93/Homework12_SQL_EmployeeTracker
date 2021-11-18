@@ -5,7 +5,9 @@
 
 You can manage employees though projects. You can view departments, roles and employees in the database. Also, it is possible to add departments, roles and employees. If you reassign the role of employee, use update role function.
 
+The video link is below.
 
+https://drive.google.com/drive/folders/1DzLYphsIat1Dx6i0RQYqH3saH8bVrfOP
 
 ## Table of Contents 
 
